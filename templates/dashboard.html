@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f0e0c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>BlogForge — Dashboard</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/dashboard.css">
+
+  
+  
+</head>
+
+
+<body>
+
+<!-- ═══════════════════════════════════════════
+     DESKTOP SIDEBAR  (hidden on mobile via CSS)
+═══════════════════════════════════════════ -->
+<nav class="sidebar">
+
+  <a href="/dashboard" class="sidebar-logo">BF</a>
+
+  <a href="/dashboard" class="sb-icon active" data-tip="New Post">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+    </svg>
+  </a>
+
+  <a href="#" class="sb-icon" data-tip="Settings">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </a>
+
+  <div class="sidebar-spacer"></div>
+
+  <!-- Desktop avatar — opens user menu -->
+  <button id="sb-avatar-btn" onclick="toggleUserMenu()" style="background:none;border:none;padding:0;cursor:pointer;">
+    {% if user.picture %}
+      <div class="sb-avatar-wrap"><img src="{{ user.picture }}" alt="{{ user.name }}"></div>
+    {% else %}
+      <div class="sb-avatar-fb">{{ user.given_name[0] | upper }}</div>
+    {% endif %}
+  </button>
+
+</nav>
+
+
+<!-- ═══════════════════════════════════════════
+     MOBILE TOPBAR  (hidden on desktop via CSS)
+═══════════════════════════════════════════ -->
+<header class="mobile-topbar">
+
+  <a href="/dashboard" class="mobile-logo">BlogForge</a>
+
+  <div class="topbar-right">
+
+    <!-- Inputs drawer toggle -->
+    <button
+      class="drawer-toggle"
+      id="drawer-toggle"
+      onclick="openDrawer()"
+      aria-label="Open post inputs"
+      aria-expanded="false"
+    >
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="6"  x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Avatar -->
+    <button
+      class="topbar-avatar-btn"
+      id="topbar-avatar-btn"
+      onclick="toggleUserMenu()"
+      aria-label="User menu"
+    >
+      {% if user.picture %}
+        <img src="{{ user.picture }}" alt="{{ user.name }}">
+      {% else %}
+        <div class="topbar-avatar-fb">{{ user.given_name[0] | upper }}</div>
+      {% endif %}
+    </button>
+
+  </div>
+</header>
+
+
+<!-- ═══════════════════════════════════════════
+     USER DROPDOWN
+═══════════════════════════════════════════ -->
+<div class="user-menu" id="user-menu" role="menu">
+  <div class="um-head">
+    <div class="um-name">{{ user.name }}</div>
+    <div class="um-email">{{ user.email }}</div>
+  </div>
+  <a href="/auth/logout" class="um-item danger" role="menuitem">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+      <polyline points="16 17 21 12 16 7"/>
+      <line x1="21" y1="12" x2="9" y2="12"/>
+    </svg>
+    Sign out
+  </a>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     DRAWER BACKDROP  (mobile tap-to-close)
+═══════════════════════════════════════════ -->
+<div class="drawer-backdrop" id="drawer-backdrop" aria-hidden="true"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     INPUT PANEL  (bottom sheet on mobile → fixed column on desktop)
+═══════════════════════════════════════════ -->
+<aside class="panel-left" id="panel-left" aria-label="Post inputs">
+
+  <!-- drag handle (mobile only) -->
+  <div class="drawer-handle" aria-hidden="true"></div>
+
+  <div class="panel-head">
+    <div class="panel-head-text">
+      <div class="panel-head-title">New Post</div>
+      <div class="panel-head-sub">Fill in the fields and generate</div>
+    </div>
+    <!-- close button (mobile only) -->
+    <button class="drawer-close" onclick="closeDrawer()" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6"  y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="panel-body">
+
+    <!-- Topic -->
+    <div class="field">
+      <label class="field-label" for="inp-topic">Topic / Prompt</label>
+      <textarea
+        class="field-input"
+        id="inp-topic"
+        placeholder="e.g. Building a production-ready RAG pipeline with LangChain and pgvector"
+        autocomplete="off"
+        spellcheck="true"
+      ></textarea>
+    </div>
+
+
+    <!-- Generate -->
+    <button class="btn-generate" id="btn-generate" onclick="generate()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+      Generate Blog Post
+    </button>
+
+    <div class="rule"></div>
+
+    <!-- Rescent Blogs -->
+    <div>
+      <div class="field-label" style="margin-bottom:10px;">Recent Blogs</div>
+
+      <div class="recent-blogs">
+        {% if recent_blogs %}
+          {% for blog in recent_blogs %}
+            <a href="#" style="display:inline-block; padding:8px 12px; text-decoration:none; font-weight:600; color:#111; background:#e8e8e8; border-bottom:2px solid #ccc; border-radius:6px;"
+                class="recent-blog-item"
+                onclick="loadBlog('{{ blog.file }}')">
+                <span>{{ blog.title }}</span>
+                <span style="margin-left:6px;font-size:16px; font-weight:900;">→</span><br>
+            </a>
+          {% endfor %}
+        {% else %}
+          <div style="opacity:.6;font-size:13px;">
+            No blogs generated yet.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div><!-- /panel-body -->
+</aside><!-- /panel-left -->
+
+
+<!-- ═══════════════════════════════════════════
+     RIGHT PANEL — OUTPUT
+═══════════════════════════════════════════ -->
+<main class="panel-right">
+
+  <!-- Desktop topbar (hidden on mobile) -->
+  <div class="output-topbar">
+    <span class="output-topbar-title">BlogForge</span>
+    <div class="output-topbar-spacer"></div>
+    <span class="output-topbar-user">{{ user.name }}</span>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button
+      class="tab"
+      id="tab-blog"
+      role="tab"
+      aria-selected="true"
+      onclick="switchTab('blog')"
+    >Blog Post</button>
+    <button
+      class="tab"
+      id="tab-linkedin"
+      role="tab"
+      aria-selected="false"
+      onclick="switchTab('linkedin')"
+    >LinkedIn</button>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ── BLOG PANE ─────────────────────────── -->
+    <div class="pane" id="pane-blog" role="tabpanel" aria-labelledby="tab-blog">
+
+      <!-- Empty state -->
+      <div class="empty" id="blog-empty">
+        <div class="empty-icon">✍️</div>
+        <div class="empty-title">Nothing here yet</div>
+        <div class="empty-sub">Select from generated blogs for</div>
+        <!-- mobile only CTA -->
+        <button class="empty-open-btn" onclick="openDrawer()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Open Inputs
+        </button>
+      </div>
+
+      <!-- Generated post (hidden until ready) -->
+      <div id="blog-post" style="display:none;" class="fade-up">
+  <div class="post-card">
+
+    <div class="post-chrome">
+      <span class="chrome-url" id="chrome-url">yourusername.github.io</span>
+      <span class="status-badge status-ready">Ready</span>
+    </div>
+
+    <div class="post-body">
+      <div class="tag-row" id="post-tags"></div>
+      <div class="post-meta-line" id="post-meta"></div>
+      <h1 id="post-title"></h1>
+      <div id="post-content"></div>
+    </div>
+
+  </div>
+</div>
+
+    </div><!-- /pane-blog -->
+
+
+    <!-- ── LINKEDIN PANE ──────────────────────── -->
+    <div class="pane" id="pane-linkedin" role="tabpanel" aria-labelledby="tab-linkedin">
+
+      <!-- Empty state -->
+      <div class="empty" id="li-empty">
+        <div class="empty-icon">💼</div>
+        <div class="empty-title">No draft yet</div>
+        <div class="empty-sub">Generate a blog post — the LinkedIn draft appears here automatically.</div>
+        <button class="empty-open-btn" onclick="openDrawer()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+          Open Inputs
+        </button>
+      </div>
+
+      <!-- LinkedIn content (hidden until ready) -->
+      <div id="li-content" style="display:none;" class="fade-up">
+
+        <!-- Post preview mock -->
+        <div class="li-card">
+          <div class="li-header">
+            {% if user.picture %}
+              <div class="li-pic"><img src="{{ user.picture }}" alt="{{ user.name }}"></div>
+            {% else %}
+              <div class="li-pic-fb">{{ user.given_name[0] | upper }}</div>
+            {% endif %}
+            <div>
+              <div class="li-name">{{ user.name }}</div>
+              <div class="li-sub">Just now · 🌐</div>
+            </div>
+            <button class="li-follow">+ Follow</button>
+          </div>
+          <div class="li-text" id="li-preview"></div>
+          <div class="li-actions">
+            <span>👍 Like</span>
+            <span>💬 Comment</span>
+            <span>🔁 Repost</span>
+            <span>📤 Send</span>
+          </div>
+        </div>
+
+        <!-- Editable textarea -->
+        <div class="li-edit">
+          <div class="li-edit-label">Edit before posting</div>
+          <textarea
+            id="li-textarea"
+            oninput="syncLinkedIn()"
+            placeholder="Your LinkedIn post will appear here…"
+            autocomplete="off"
+            spellcheck="true"
+          ></textarea>
+        </div>
+
+      </div>
+    </div><!-- /pane-linkedin -->
+
+  </div><!-- /content -->
+</main><!-- /panel-right -->
+
+
+<!-- ═══════════════════════════════════════════
+     BOTTOM NAV  (mobile only, hidden on desktop)
+═══════════════════════════════════════════ -->
+<nav class="bottom-nav" aria-label="Main navigation">
+
+  <!-- Blog tab -->
+  <button class="bn-item active" data-tab="blog" onclick="switchTab('blog')" aria-label="Blog Post">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+    Blog
+  </button>
+
+  <!-- Generate (centre FAB-style) -->
+  <button class="bn-item" onclick="openDrawer()" aria-label="New post">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="16"/>
+      <line x1="8"  y1="12" x2="16" y2="12"/>
+    </svg>
+    New
+  </button>
+
+  <!-- LinkedIn tab -->
+  <button class="bn-item" data-tab="linkedin" onclick="switchTab('linkedin')" aria-label="LinkedIn">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <rect x="2" y="2" width="20" height="20" rx="4"/>
+      <path d="M8 11v5M8 8v.01M12 16v-5M12 11a3 3 0 0 1 6 0v5"/>
+    </svg>
+    LinkedIn
+  </button>
+
+</nav>
+
+
+<!-- ═══════════════════════════════════════════
+     TOAST
+═══════════════════════════════════════════ -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span class="toast-icon"></span>
+  <span class="toast-msg"></span>
+</div>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+    displayMath: [['$$', '$$']]
+  },
+  options: {
+    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="/static/dashboard.js"></script>
+</body>
+</html>

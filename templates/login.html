@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — BlogForge</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #07070a;
+    --surface: #0f0f14;
+    --border:  #1e1e28;
+    --borderh: #2e2e3f;
+    --text:    #eceaf5;
+    --muted:   #64637a;
+    --accent:  #7c6af7;
+    --accent2: #e07bbc;
+    --dim:     #1a1a24;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* ── Canvas background ── */
+  canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.55;
+  }
+
+  /* ── Noise ── */
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+
+  /* ── Layout ── */
+  .page {
+    position: relative; z-index: 2;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+  }
+
+  /* ── Left panel ── */
+  .left {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 48px 56px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .brand-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 14px var(--accent);
+  }
+  .brand-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    color: var(--text);
+    letter-spacing: -0.03em;
+  }
+
+  .left-hero {
+    max-width: 520px;
+  }
+  .left-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .left-eyebrow::before {
+    content: '';
+    width: 28px; height: 1px;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+  .left-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(38px, 5vw, 64px);
+    line-height: 1.06;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+  .left-title em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .left-sub {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 400px;
+  }
+
+  .left-features {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 44px;
+  }
+  .feature {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #9a98b5;
+  }
+  .feature-icon {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    background: var(--dim);
+    flex-shrink: 0;
+  }
+
+  .left-footer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Right panel ── */
+  .right {
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle top gradient in right panel */
+  .right::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+
+  .right-glow {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,106,247,0.06) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    pointer-events: none;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 360px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Animated top bar on card */
+  .card-top-bar {
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent));
+    background-size: 200% 100%;
+    border-radius: 2px 2px 0 0;
+    animation: shimmer 3s linear infinite;
+    margin-bottom: 36px;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .card-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .card-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.15;
+  }
+
+  .card-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 36px;
+    font-weight: 300;
+  }
+
+  /* ── Error banner ── */
+  .error-banner {
+    background: rgba(232, 82, 82, 0.1);
+    border: 1px solid rgba(232, 82, 82, 0.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #f28b82;
+    animation: slideDown 0.3s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .error-icon { font-size: 15px; flex-shrink: 0; }
+
+  /* ── Google button ── */
+  .google-btn {
+    width: 100%;
+    background: var(--text);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 12px;
+    padding: 0;
+    cursor: pointer;
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    display: block;
+    transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1),
+                box-shadow 0.18s ease,
+                background 0.15s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .google-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .google-btn:hover::after { opacity: 1; }
+  .google-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(124,106,247,0.2);
+    background: #f5f3ff;
+  }
+  .google-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+
+  .google-btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 15px 24px;
+  }
+
+  .google-icon {
+    width: 20px; height: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Loading state */
+  .google-btn.loading .google-btn-inner { opacity: 0.6; }
+  .google-btn.loading::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 200%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: sweep 1.2s linear infinite;
+  }
+  @keyframes sweep {
+    from { left: -100%; }
+    to   { left: 100%; }
+  }
+
+  /* ── Divider ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 28px 0;
+  }
+  .divider-line {
+    flex: 1; height: 1px;
+    background: var(--border);
+  }
+  .divider-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Trust row ── */
+  .trust {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px;
+    background: var(--dim);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-top: 24px;
+  }
+  .trust-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .trust-text {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .trust-text strong { color: #9a98b5; font-weight: 500; }
+
+  /* ── Right footer ── */
+  .right-footer {
+    position: absolute;
+    bottom: 28px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  /* ── Fade in ── */
+  .fade-up {
+    animation: fadeUp 0.55s ease both;
+  }
+  .fu-1 { animation-delay: 0.05s; }
+  .fu-2 { animation-delay: 0.12s; }
+  .fu-3 { animation-delay: 0.20s; }
+  .fu-4 { animation-delay: 0.28s; }
+  .fu-5 { animation-delay: 0.36s; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .page { grid-template-columns: 1fr; }
+    .left { display: none; }
+    .right {
+      border-left: none;
+      background: var(--bg);
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<div class="page">
+
+  <!-- LEFT: Branding panel -->
+  <div class="left">
+    <a href="/" class="brand">
+      <span class="brand-dot"></span>
+      <span class="brand-name">BlogForge</span>
+    </a>
+
+    <div class="left-hero fade-up fu-1">
+      <div class="left-eyebrow">Your personal publishing system</div>
+      <h1 class="left-title">
+        Write once,<br>
+        publish <em>everywhere.</em>
+      </h1>
+      <p class="left-sub">
+        AI-generated blog posts, auto-deployed to GitHub Pages, with LinkedIn post drafts ready for your approval.
+      </p>
+
+      <div class="left-features">
+        <div class="feature">
+          <div class="feature-icon">⚡</div>
+          Generate full blog posts from a single topic
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🚀</div>
+          One-click publish to GitHub Pages
+        </div>
+        <div class="feature">
+          <div class="feature-icon">💼</div>
+          Auto-draft LinkedIn posts for your approval
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🔄</div>
+          Retry & refine until it's exactly right
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">v1.0 · Personal Edition · AI-powered</div>
+  </div>
+
+  <!-- RIGHT: Auth card -->
+  <div class="right">
+    <div class="right-glow"></div>
+
+    <div class="card">
+      <div class="card-top-bar fade-up fu-1"></div>
+
+      <div class="card-eyebrow fade-up fu-2">Authentication</div>
+      <h2 class="card-title fade-up fu-2">Welcome back</h2>
+      <p class="card-sub fade-up fu-3">
+        Sign in to access your publishing dashboard.
+      </p>
+
+      <!-- Error banner (shown conditionally) -->
+      {% if error %}
+      <div class="error-banner">
+        <span class="error-icon">⚠</span>
+        <span>
+          {% if error == "unauthorized_email" %}
+            This Google account is not authorized to access BlogForge.
+          {% elif error == "access_denied" %}
+            Sign-in was cancelled. Please try again.
+          {% elif error == "state_mismatch" or error == "state_expired" %}
+            Security check failed. Please try again.
+          {% else %}
+            Authentication failed. Please try again.
+          {% endif %}
+        </span>
+      </div>
+      {% endif %}
+
+      <!-- Google Sign-In button -->
+      <a
+        href="/auth/google"
+        class="google-btn fade-up fu-3"
+        id="google-btn"
+        onclick="handleClick(this)"
+      >
+        <div class="google-btn-inner">
+          <!-- Official Google "G" SVG logo -->
+          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span id="btn-text">Continue with Google</span>
+        </div>
+      </a>
+
+      <div class="divider fade-up fu-4">
+        <div class="divider-line"></div>
+        <div class="divider-text">secure sign-in</div>
+        <div class="divider-line"></div>
+      </div>
+
+      <div class="trust fade-up fu-5">
+        <span class="trust-icon">🔒</span>
+        <div class="trust-text">
+          <strong>Private access only.</strong> This dashboard is personal — only your authorized Google account can sign in. No passwords stored, no third-party tracking.
+        </div>
+      </div>
+    </div>
+
+    <div class="right-footer">BlogForge · Personal Publishing System</div>
+  </div>
+
+</div>
+
+<script>
+/* ── Animated particle canvas ── */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const particles = [];
+const PARTICLE_COUNT = 60;
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+    r: Math.random() * 1.5 + 0.3,
+    vx: (Math.random() - 0.5) * 0.25,
+    vy: (Math.random() - 0.5) * 0.25,
+    opacity: Math.random() * 0.5 + 0.1,
+  });
+}
+
+// Slow-moving connection lines
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(124,106,247,${(1 - dist/120) * 0.12})`;
+        ctx.lineWidth = 0.5;
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw particles
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(124,106,247,${p.opacity})`;
+    ctx.fill();
+
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ── Button loading state ── */
+function handleClick(btn) {
+  btn.classList.add('loading');
+  document.getElementById('btn-text').textContent = 'Redirecting to Google…';
+}
+</script>
+</body>
+</html>
