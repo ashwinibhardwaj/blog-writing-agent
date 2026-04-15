@@ -51,13 +51,13 @@ to produce coherent and contextually relevant blog content.
 ## System Architecture
 
 ```
-User Login (Google OAuth)
+ User Login (Google OAuth)
         ↓
-     Dashboard UI
+ Dashboard UI
         ↓
-   Topic Input
+ Topic Input
         ↓
-   Planner Module
+ Planner Module
         ↓
  Routing Layer ───────────────┐
         ↓                     ↓
@@ -69,9 +69,9 @@ User Login (Google OAuth)
         ↓                     ↓
         Parallel Workers (Subtasks)
                     ↓
-             Aggregation Layer
+            Aggregation Layer
                     ↓
-              Final Blog Output
+            Final Blog Output(.md/.html(predefined template)
 ```
 
 ---
