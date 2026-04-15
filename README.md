@@ -71,7 +71,7 @@ to produce coherent and contextually relevant blog content.
                     ↓
             Aggregation Layer
                     ↓
-            Final Blog Output(.md/.html(predefined template)
+            Final Blog Output(.md/.html(predefined template))
 ```
 
 ---
