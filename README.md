@@ -60,13 +60,13 @@ User Login (Google OAuth)
    Planner Module
         ↓
  Routing Layer ───────────────┐
-        ↓                    ↓
+        ↓                     ↓
  Direct Generation    Research Pipeline
-                          ↓
-                   External Retrieval
-                          ↓
-                   Content Generation
-        ↓                    ↓
+        |                     ↓
+        |             External Retrieval
+        |                     ↓
+        |             Content Generation
+        ↓                     ↓
         Parallel Workers (Subtasks)
                     ↓
              Aggregation Layer
